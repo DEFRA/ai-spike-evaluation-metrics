@@ -1,0 +1,6 @@
+.ipynb_checkpoints/
+.venv/
+data/
+output/
+pythonproject.egg-info/
+uv.lock
