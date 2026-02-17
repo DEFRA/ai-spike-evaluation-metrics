@@ -1,0 +1,49 @@
+[project]
+name = "pythonproject"
+version = "0.1.0"
+description = "Python project with OCR capabilities using Claude 3.5 Sonnet and GPT-4o"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3",
+    "ipykernel>=7.1.0",
+    "jupyter>=1.0.0",
+    "python-Levenshtein>=0.27.3",
+    "pytesseract>=0.3.10",
+    "numpy>=1.24.0",
+    "pandas>=3.0.0",
+    "pillow>=10.0.0",
+    "requests>=2.31.0",
+    "pypi-json>=0.4.0",
+    "deepeval>=3.8.4",
+    "huggingface-hub[cli]>=1.4.1",
+    "langdetect>=1.0.9",
+    "transformers[torch]>=5.1.0",
+    "torch>=2.10.0",
+    "torchvision>=0.25.0",
+    "accelerate>=1.12.0",
+    "datasets>=4.5.0",
+    "hf-transfer>=0.1.9",
+    "matplotlib>=3.10.8",
+    "pypdf>=6.7.0",
+    "pdf2image>=1.17.0",
+    "pymupdf>=1.27.1",
+]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+dev-dependencies = [
+    "ipykernel>=7.1.0",
+]
+
+[tool.uv.extra-build-dependencies]
+flash-attn = ["torch"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["data*", "output*"]
+
+[tool.taskipy.tasks]
+create-kernel = "ipython kernel install --user --env VIRTUAL_ENV $(pwd)/.venv --name=ai-spike-evaluation-metrics"
