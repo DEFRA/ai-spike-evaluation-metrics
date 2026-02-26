@@ -1,4 +1,4 @@
-# AI Document Processing Spike
+# AI Evaluation Metrics Spike
 
 This repository contains an experimental spike investigating the reliability of various methods for evaluating llm responses.
 
