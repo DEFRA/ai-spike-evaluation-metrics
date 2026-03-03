@@ -3,36 +3,42 @@
 Status: Completed
 
 ## Need
-Defra hosts a wealth of documents in varying legacy formats including micro-fiche. A solution for reliably digitising these documents is required.
+As part of the LLM validation framework we need a process for comparing LLM responses to known ground truths, e.g. comparing the answers to questions with the known correct answer or comparing LLM generated summaries to the human-written equivalent.  For the initial LLM validation we used two methods for making this comparison - DeepEval (LLM-As-A-Judge) and Bert-Score (Semantic Similarity).  DeepEval seemed to provide the best peformance based on finding that newer and bigger models outperformed older and smaller ones.  However there are other methods to do this e.g. Ragas, Meteor and Pydantic and simply looking for the correct ordering of models is not a robust enough way to choose the best evaluation metric.
+
 
 ## Hypothesis
-
-Defra's documents can be accuractly and efficiencly digitised using AI or a simpler, dedicated open-source tool.
+One of the evaluation metrics DeepEval, Pydantic, Ragas or Bert-Score provides a reliable method of comparing LLM responses to the ground-truth and we can determine which method peforms best.
 
 ## What we aim to discover
-- Whether AIs can be used to perform OCR on Defra's document
-- Whether VLMs can be used to perform OCR
-- Which types of documents can be processed
-- How the performance of AIs compare to dedicated tools in this task
-- How the AIs should be tuned to best peform this task
-- How dedicated tools should be tuned to best peform this task.
+- Which of DeepEval, Pydantic, Ragas or Bert-Score provides the most reliable method of comparing an LLM response to the ground-truth.
 
 ## Assumptions
-- The reference text in the public datasets for validating OCR is an accurate reflection of the image text
-- The types of documents included in the public dataset are representative of the types of documents that Defra want to process
+- The ground truths are true
+
+## Methodology
+- We investigated two functions of LLMs: the ability to answer questions and the ability to summarise documents.
+
+- For Question Answering we used a public dataset of questions with an array of correct answers, the best answer and an array of incorrect answers.  We exploded the correct and incorrect answer arrays into a column and added a field is_correct describing which of the two arrays they came from.  We fed all the answers into all of our evaluation methods and asked them to calculate a score reflecting correctness.  For each method we evaluated the difference between the mean score for correct answers and incorrect answers.  We also chose a threshold above which answers were deemed correct, and calculated a confusion matrix and f1 score. The difference-between-means and f1 were then examined and compared across the five evaluation methods.  We then set the threshold equal to the mean of correct and incorrect scores and repeated.  This offered an improvement in f1.
+
+- For Document summarising we used a public dataset of documents with a human written summary.  We added a field is_correct=True to this dataset.  We then duplicated the dataset, randomly shuffled the summaries, added a field is_correct=False and added this to the original dataset.  We fed all the answers into all of our evaluation methods and asked them to calculate a score reflecting the quality of the summary.  For each method we evaluated the difference between the mean score for the correct and incorrect summaries.  We also chose a threshold equal above which summaries were deemed correct, and calculated a confusion matrix and f1 score. The difference-between-means and f1 were then examined and compared across the five evaluation methods.  We then set the threshold equal to the mean of correct and incorrect scores and repeated.  This offered an improvement in f1.
+
+We repeated the entire experiment with different back-end models and different values of model temperature where applicable.
+
 
 ## Outcomes
-We used a public dataset of images of text along with the associated annotations to validate the ability of AI (Claude) and a dedicated tool (Tesseract) to peform OCR on four different document types - printed documents, handwritten documents, forms and invoices.  We used documents taken from Defra Sharepoint to validate the same function on Defra documents.
+Pydantic generally offers the best performance but the choice of model depends on the type of response being compared.  GPT OSS 120b performs better when comparing question answers whereas Claude 3 Haiku is best at comparing document summaries.  Temperature makes little difference.  We will therefore proceed using Pydantic with Claude Haiku and GPT OSS 120b and a temperature of 0.  Due to the small number of prompts processed results should be treated with caution.
+
 
 ### Key Findings
-- The performance of AI in performing OCR on printed documents is comparable to dedicated tools.
-- AI outperforms tesseract when doing OCR on hand-writing.  However other tools dedicated to OCR of hand-writing are available.
-- Tesseract should be used in auto mode when processing entire pages and line mode when processing individual bounding boxes.
-- AIs have a propensity to hallucinate entire sentences which are not included in the source image.  This is potentially very dangerous.
-- Different tools perform better on different document types.  A document classifier e.g. using machine-vision should perhaps be used to triage documents to determine the appropriate tool.
+When comparing the answers to questions
+- Pydantic offers the biggest difference in correct and incorrect scores but Deepeval offers the best f1 score.
+- GPT OSS 120b offers the best score-difference and f1
+- Temperature makes no difference
+
+When comparing the summaries of documents
+- Pydantic offers the biggest difference in correct and incorrect scores and highest f1 score.
+- Claude 3 Haiku offers the best score-difference and f1
+- There is a slight improvement when using a temperature of 0.1 over 0 or 0.2
 
 ## Shortcomings
-- We have failed to track down any real-world examples of the types of documents Defra want to process
-- One user raised the requirement to OCR river hydrology data stored on micro-fiche, however we cannot seem to track down this user or any micro-fiche data
-- Some of the annotations in the public dataset we used were not an accurate representation of the text contained in the source image
-- We failed to get VLMs to work on our local machines.  A GPU cluster is required.
+- Due to processing limitations in using a laptop we have based our conclusions on 30 prompts per evaluation method, model and temperature.  To draw a more reliable conclusion we need to re-run the process on a cluster using at least 100 prompts per method, model and temperature.
