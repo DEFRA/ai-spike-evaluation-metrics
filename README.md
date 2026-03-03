@@ -41,6 +41,6 @@ uv run --with jupyter jupyter lab
 ```
 
 ### Notebooks
-The experiments are contained within Jupyter notebooks located in the top level directory.
+The experiments are contained within Jupyter notebooks located in the top level directory.  qanda-metrics.ipynb and summarisation-metrics.ipynb should be run first followed by anlyse-metrics.ipynb once the metrics have been generated.
 
 Further documentation is provided within each notebook and in the [Experiment Writeup](experiment-writeup.md).
